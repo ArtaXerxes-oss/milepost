@@ -146,9 +146,19 @@ const UNKNOWN: Explained = {
  * else entirely — a network error, a rejected signature, a bug in our own code.
  */
 export function extractCode(error: unknown): number | null {
-  const text =
-    typeof error === 'string' ? error : error instanceof Error ? error.message : JSON.stringify(error ?? '');
+  const parts: string[] = [];
 
+  if (typeof error === 'string') {
+    parts.push(error);
+  } else if (error && typeof error === 'object') {
+    const candidate = error as { message?: unknown; cause?: unknown };
+    if (typeof candidate.message === 'string') parts.push(candidate.message);
+    if (candidate.cause !== undefined && candidate.cause !== null) parts.push(String(candidate.cause));
+    const json = JSON.stringify(error);
+    if (json && json !== '{}') parts.push(json);
+  }
+
+  const text = parts.join('\n');
   const match = text.match(/Error\(Contract,\s*#(\d+)\)/) ?? text.match(/#(\d+)\)/);
   return match ? Number(match[1]) : null;
 }
@@ -167,7 +177,20 @@ export function explainCode(contract: ContractName, code: number): Explained {
  * network.
  */
 export function explain(error: unknown, contract: ContractName = 'program'): Explained {
-  const text = error instanceof Error ? error.message : String(error ?? '');
+  const text = (() => {
+    if (typeof error === 'string') return error;
+    if (error instanceof Error) return error.message;
+    if (error && typeof error === 'object') {
+      const candidate = error as { message?: unknown; cause?: unknown };
+      const parts: string[] = [];
+      if (typeof candidate.message === 'string') parts.push(candidate.message);
+      if (candidate.cause !== undefined && candidate.cause !== null) parts.push(String(candidate.cause));
+      const json = JSON.stringify(error);
+      if (json && json !== '{}') parts.push(json);
+      return parts.join('\n');
+    }
+    return String(error ?? '');
+  })();
 
   if (/user (declined|rejected)|denied by the user|UserDeclined/i.test(text)) {
     return { kind: 'none', message: 'You declined the signature.', action: 'Nothing was submitted.' };

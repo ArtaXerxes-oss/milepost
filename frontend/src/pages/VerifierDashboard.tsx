@@ -91,6 +91,10 @@ export const VerifierDashboard = () => {
   const [myProgrammes, setMyProgrammes] = useState<MyProgramme[] | null>(null);
   useEffect(() => {
     if (!address) {
+      // The dashboard intentionally clears the derived programme list at the
+      // moment the connection disappears; the read loop is re-established on the
+      // next wallet change.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setMyProgrammes(null);
       return;
     }

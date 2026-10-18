@@ -216,7 +216,7 @@ describe('Issue #265 - AwardsTab component', () => {
     expect(screen.getByText('1,800.00 USDC')).toBeDefined();
     // The fixture awards must not appear.
     expect(screen.queryByText(/GBB4Q2…8T19/)).toBeNull();
-    expect(screen.queryByText(/Awards are the median of reviewer votes/)).toBeNull();
+    expect(screen.queryByText(/Awards use the middle reviewer vote after enough reviewers have voted/)).toBeNull();
   });
 
   it('keeps fixture awards and the sample note for a true sample programme', () => {
@@ -228,7 +228,7 @@ describe('Issue #265 - AwardsTab component', () => {
       />,
     );
 
-    expect(screen.getByText(/Awards are the median of reviewer votes/)).toBeDefined();
+    expect(screen.getByText(/Awards use the middle reviewer vote after enough reviewers have voted/)).toBeDefined();
     expect(screen.getByText(/GBB4Q2…8T19/)).toBeDefined();
   });
 });
